@@ -36,7 +36,7 @@ public class GeneralUtiles {
 
 	public static String generateTempExcelFile(String msgUrl, String tempDir) {
 		String date = ExtractDateFromString(msgUrl);
-		String fileName = FileNameUtils.getBaseName(msgUrl);
+		String fileName = removeWhiteSpacesFromString(FileNameUtils.getBaseName(msgUrl));
 		return tempDir + date + "_" + fileName + "Excel_.xlsx";
 	}
 

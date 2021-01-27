@@ -77,7 +77,8 @@ public class MessageUtiles {
 		if (attachments.length > 0) {
 			for (AttachmentChunks attachmentChunks : attachments) {
 				StringChunk ext = attachmentChunks.getAttachExtension();
-				if (ext.getValue().equalsIgnoreCase(".xlsx")) {
+				System.out.println(ext.getValue());
+				if (ext.getValue().equalsIgnoreCase(".xlsx")||ext.getValue().equalsIgnoreCase(".xls")) {
 					boolean excelStatus = writeExcelFile(tempExcelPath, attachmentChunks);
 					if (excelStatus)
 						return null;

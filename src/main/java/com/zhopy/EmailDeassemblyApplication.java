@@ -16,6 +16,9 @@ import com.zhopy.utiles.ExcelService;
 import com.zhopy.utiles.GeneralUtiles;
 import com.zhopy.utiles.MessageUtiles;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class EmailDeassemblyApplication {
 	public static BufferedWriter bwLog;
 	public static BufferedWriter bwResults;
@@ -27,6 +30,7 @@ public class EmailDeassemblyApplication {
 
 	public static void main(String[] args) throws Exception {
 
+		log.info("<<<<<<<<<<<<<<<<<<<Test>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		if (args.length == 0)
 			args = new String[] { "C:\\Users\\Mohamed_Hamada\\Desktop\\input.xlsx" };
 
@@ -34,7 +38,7 @@ public class EmailDeassemblyApplication {
 		List<InputDto> inputDtoList = ExcelService.loadInput(args[0]);
 		List<String> originalEmailsList = inputDtoList.parallelStream().map(e -> e.getOriginalEmail())
 				.filter(e -> e != null && e.toLowerCase().endsWith(".msg")).distinct().collect(Collectors.toList());
-		originalEmailsList.parallelStream().forEach(e -> mainExecuter(e, filterSpecificEmail(inputDtoList, e)));
+		originalEmailsList.stream().forEach(e -> mainExecuter(e, filterSpecificEmail(inputDtoList, e)));
 		flush();
 		closeBw();
 	}
