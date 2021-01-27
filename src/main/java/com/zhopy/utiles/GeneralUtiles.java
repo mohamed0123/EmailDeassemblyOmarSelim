@@ -21,10 +21,10 @@ public class GeneralUtiles {
 				.replaceAll("https://download.siliconexpert.com/pdfs/", "");
 	}
 
-	@SuppressWarnings("unused")
-	private static String getLocalPath(String path) {
-		return path.replaceAll("http://download.siliconexpert.com/pdfs", "//auto-engine2/pdfs")
-				.replaceAll("https://download.siliconexpert.com/pdfs", "//auto-engine2/pdfs");
+	
+	public static String getLocalPath(String path) {
+		return path.replaceAll("http://download.siliconexpert.com/pdfs", "//10.0.1.112/pdfs")
+				.replaceAll("https://download.siliconexpert.com/pdfs", "//10.0.1.112/pdfs");
 	}
 
 	public static String generateTempMessageFile(String msgUrl, String tempDir) {
@@ -45,5 +45,11 @@ public class GeneralUtiles {
 		if (f.exists() && f.length() > 0)
 			return true;
 		return false;
+	}
+	
+	public static String removeWhiteSpacesFromString(String token) {
+		if (token == null)
+			return "";
+		return token.replaceAll("\\t+", " ").replaceAll("\\r+", " ").replaceAll("\\n+", " ").replaceAll("\\r\\n+", " ");
 	}
 }

@@ -57,7 +57,7 @@ public class MessageUtiles {
 		return true;
 	}
 
-	public static String attachedExcelHandler(String tempExcelPath , String temMsgDir) {
+	public static String attachedExcelHandler(String tempExcelPath, String temMsgDir) {
 		MAPIMessage msg = null;
 		try {
 			msg = initMessageObjectFromMsgFile(temMsgDir);
@@ -65,6 +65,8 @@ public class MessageUtiles {
 				return "cann't read message file";
 
 			return writeExcelToPath(msg, tempExcelPath);
+		} catch (Exception e) {
+			return e.getMessage();
 		} finally {
 			closeMessage(msg);
 		}

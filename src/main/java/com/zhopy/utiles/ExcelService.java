@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -13,7 +15,7 @@ import com.zhopy.dto.InputDto;
 
 public class ExcelService {
 
-	public static List<InputDto> loadAttachedExcelDto(String path) {
+	public static List<InputDto> loadAttachedExcelDto(String path, String originalEmail) {
 		List<InputDto> attachedExcelDtoList = new ArrayList<>();
 		try (XSSFWorkbook myWorkBook = new XSSFWorkbook(path)) {
 			XSSFSheet mySheet = myWorkBook.getSheetAt(0);
@@ -21,8 +23,8 @@ public class ExcelService {
 			skipHeader(rowIterator); // Skip Header
 			while (rowIterator.hasNext()) {
 				Row row = rowIterator.next();
-				attachedExcelDtoList
-						.add(new InputDto(getCellStringValue(row, 0), null, getCellStringValue(row, 7), null));
+				attachedExcelDtoList.add(new InputDto(getCellStringValue(row, 0), getCellStringValue(row, 3),
+						getCellStringValue(row, 7), originalEmail));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -54,7 +56,24 @@ public class ExcelService {
 
 	private static String getCellStringValue(Row row, int index) {
 		try {
-			return row.getCell(index).getStringCellValue();
+			String val = "";
+			DataFormatter formatter = new DataFormatter();
+
+			Cell cell = row.getCell(index);
+
+			switch (cell.getCellType()) {
+			case NUMERIC:
+				val = String.valueOf(formatter.formatCellValue(cell));
+				break;
+			case STRING:
+				val = formatter.formatCellValue(cell);
+				break;
+			default:
+				val = String.valueOf(formatter.formatCellValue(cell));
+				break;
+			}
+
+			return val;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
