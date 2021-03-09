@@ -4,10 +4,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import org.apache.poi.hsmf.MAPIMessage;
 import org.apache.poi.hsmf.datatypes.AttachmentChunks;
 import org.apache.poi.hsmf.datatypes.StringChunk;
+
+import com.zhopy.dto.MessageDto;
 
 public class MessageUtiles {
 
@@ -57,16 +61,48 @@ public class MessageUtiles {
 		return true;
 	}
 
-	public static String attachedExcelHandler(String tempExcelPath, String temMsgDir) {
+	public static MessageDto attachedExcelHandler(String tempExcelPath, String temMsgDir) {
+
 		MAPIMessage msg = null;
+		MessageDto messageDto = new MessageDto();
 		try {
 			msg = initMessageObjectFromMsgFile(temMsgDir);
-			if (msg == null)
-				return "cann't read message file";
+			if (msg == null) {
+				messageDto.setStatus("Error");
+				messageDto.setErrMsg("cann't read message file");
+				return messageDto;
+			}
 
-			return writeExcelToPath(msg, tempExcelPath);
+			System.out.println(msg.getSummaryInformation());
+			System.out.println(msg.getDisplayCC());
+			System.out.println(msg.getRecipientNames());
+			System.out.println(msg.getHeaders());
+			System.out.println(msg.getRecipientEmailAddress());
+			System.out.println(msg.getSummaryInformation());
+			System.out.println(msg.getSummaryInformation());
+			
+			messageDto.setCc(msg.getDisplayCC());
+			messageDto.setFrom(msg.getDisplayFrom());
+			messageDto.setTo(msg.getRecipientEmailAddress() );
+			
+			
+			DateTimeFormatter formmat1 = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH);
+
+			messageDto.setRecivedDate(msg.getMessageDate().toString());
+
+			String writeExcel = writeExcelToPath(msg, tempExcelPath);
+
+			if (writeExcel == null) {
+				messageDto.setStatus("Done");
+			} else {
+				messageDto.setStatus("Error");
+				messageDto.setErrMsg(writeExcel);
+			}
+			return messageDto;
 		} catch (Exception e) {
-			return e.getMessage();
+			messageDto.setStatus("Error");
+			messageDto.setErrMsg(e.getMessage());
+			return messageDto;
 		} finally {
 			closeMessage(msg);
 		}
@@ -78,7 +114,7 @@ public class MessageUtiles {
 			for (AttachmentChunks attachmentChunks : attachments) {
 				StringChunk ext = attachmentChunks.getAttachExtension();
 				System.out.println(ext.getValue());
-				if (ext.getValue().equalsIgnoreCase(".xlsx")||ext.getValue().equalsIgnoreCase(".xls")) {
+				if (ext.getValue().equalsIgnoreCase(".xlsx") || ext.getValue().equalsIgnoreCase(".xls")) {
 					boolean excelStatus = writeExcelFile(tempExcelPath, attachmentChunks);
 					if (excelStatus)
 						return null;

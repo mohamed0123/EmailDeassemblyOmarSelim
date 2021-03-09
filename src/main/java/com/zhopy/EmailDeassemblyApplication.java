@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.zhopy.dto.InputDto;
+import com.zhopy.dto.MessageDto;
 import com.zhopy.utiles.DownloadUtiles;
 import com.zhopy.utiles.ExcelService;
 import com.zhopy.utiles.GeneralUtiles;
@@ -32,7 +33,7 @@ public class EmailDeassemblyApplication {
 
 		log.info("<<<<<<<<<<<<<<<<<<<Test>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		if (args.length == 0)
-			args = new String[] { "C:\\Users\\Mohamed_Hamada\\Desktop\\input.xlsx" };
+			args = new String[] { "C:\\Users\\Mohamed_Hamada\\Downloads\\Book3.xlsx" };
 
 		init();
 		List<InputDto> inputDtoList = ExcelService.loadInput(args[0]);
@@ -109,9 +110,9 @@ public class EmailDeassemblyApplication {
 			return;
 		}
 		String tempExcelPath = GeneralUtiles.generateTempExcelFile(originalEmail, excelTempDir);
-		String errorMessage = MessageUtiles.attachedExcelHandler(tempExcelPath, temMsgDir);
-		if (errorMessage != null) {
-			writeLogFile(originalEmail, "Error", errorMessage);
+		MessageDto messageDto = MessageUtiles.attachedExcelHandler(tempExcelPath, temMsgDir);
+		if (messageDto.getErrMsg() != null) {
+			writeLogFile(originalEmail, "Error", messageDto.getErrMsg());
 			return;
 		}
 		List<InputDto> partsStatusResults = ExcelService.loadAttachedExcelDto(tempExcelPath, originalEmail);
@@ -123,7 +124,7 @@ public class EmailDeassemblyApplication {
 		partsStatusResults = partsStatusResults.parallelStream()
 				.filter(e -> e.getPartNumber() != null && !e.getPartNumber().isEmpty()).collect(Collectors.toList());
 		// write compare method
-		comparePartNumbers(originalEmail, partsStatusResults, inputDtoList);
+		comparePartNumbers(originalEmail, partsStatusResults, inputDtoList, messageDto);
 		flush();
 
 	}
@@ -152,13 +153,17 @@ public class EmailDeassemblyApplication {
 		return diff;
 	}
 
-	public static void writeAddedDeletedToResultsFile(List<InputDto> records, String status) {
+	public static void writeAddedDeletedToResultsFile(List<InputDto> records, String status, MessageDto messageDto) {
 		records.stream().forEach(e -> {
 			try {
 				bwResults.append(e.getPartNumber() + "\t");
 				bwResults.append(e.getDescription() + "\t");
 				bwResults.append(e.getLcStatus() + "\t");
 				bwResults.append(e.getOriginalEmail() + "\t");
+				bwResults.append(messageDto.getCc() + "\t");
+				bwResults.append(messageDto.getFrom() + "\t");
+				bwResults.append(messageDto.getRecivedDate() + "\t");
+				bwResults.append(messageDto.getTo() + "\t");
 				bwResults.append(status + "\t");
 				bwResults.append("" + "\r\n");
 			} catch (IOException e1) {
@@ -168,21 +173,21 @@ public class EmailDeassemblyApplication {
 	}
 
 	public static void comparePartNumbers(String originalEmail, List<InputDto> partsStatusResults,
-			List<InputDto> inputDtoList) {
+			List<InputDto> inputDtoList, MessageDto messageDto) {
 
 		List<InputDto> added = getDiffrenceList(partsStatusResults, inputDtoList);
 		List<InputDto> deleted = getDiffrenceList(inputDtoList, partsStatusResults);
 		List<InputDto> common = getSharedList(inputDtoList, partsStatusResults);
 
-		writeAddedDeletedToResultsFile(added, "Extra Added Parts");
-		writeAddedDeletedToResultsFile(deleted, "Missed Parts");
-		commonToResultsHandler(originalEmail, common, deleted, added, partsStatusResults);
+		writeAddedDeletedToResultsFile(added, "Extra Added Parts", messageDto);
+		writeAddedDeletedToResultsFile(deleted, "Missed Parts", messageDto);
+		commonToResultsHandler(originalEmail, common, deleted, added, partsStatusResults, messageDto);
 		System.out.println("<<<<<<<<<<<>>>>>>>>>>>");
 
 	}
 
 	public static void commonToResultsHandler(String originalEmail, List<InputDto> common, List<InputDto> deleted,
-			List<InputDto> added, List<InputDto> partsStatusResults) {
+			List<InputDto> added, List<InputDto> partsStatusResults, MessageDto messageDto) {
 		String partsStatus;
 		if (added.size() != 0 || deleted.size() != 0)
 			partsStatus = "Miss Match Parts";
@@ -193,7 +198,7 @@ public class EmailDeassemblyApplication {
 			if (isLcStatusChanged)
 				writeLogFile(originalEmail, partsStatus + "|LC Have Change", "");
 			else
-				writeLogFile(originalEmail, partsStatus + "|No Change In LC", "cannot load excel data from path");
+				writeLogFile(originalEmail, partsStatus + "|No Change In LC", "");
 		} catch (Exception e) {
 			e.printStackTrace();
 			writeLogFile(originalEmail, partsStatus + "|LC Have Change", "cannot write to reslts file");
@@ -225,6 +230,10 @@ public class EmailDeassemblyApplication {
 		bwResults.append("Description" + "\t");
 		bwResults.append("LC Status" + "\t");
 		bwResults.append("original Mail" + "\t");
+		bwResults.append("cc" + "\t");
+		bwResults.append("from" + "\t");
+		bwResults.append("RecivedDate" + "\t");
+		bwResults.append("to" + "\t");
 		bwResults.append("Status" + "\t");
 		bwResults.append("attached LC Status" + "\r\n");
 
