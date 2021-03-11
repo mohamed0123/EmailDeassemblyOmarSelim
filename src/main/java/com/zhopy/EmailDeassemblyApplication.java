@@ -169,6 +169,21 @@ public class EmailDeassemblyApplication {
 				bwResults.append(messageDto.getRecivedDate() + "\t");
 				bwResults.append(messageDto.getTo() + "\t");
 				bwResults.append(status + "\t");
+				bwResults.append(e.getManufacturerName() + "\t");
+				bwResults.append(e.getCustomerInternalPartNumber() + "\t");
+				bwResults.append(e.getComment() + "\t");
+				bwResults.append(e.getCorrectedManufacturerNameIfNecessary() + "\t");
+				bwResults.append(e.getCorrectedMpnToBeFilledIfMpnIsIncorrectOrInvalid() + "\t");
+				bwResults.append(e.getLtbDateTheLastDateByWhenTheCustomerCanOrderThePart() + "\t");
+				bwResults.append(e.getReasonForNrndDiscontinuedObsoletedIfPartIsNrndDiscontinuedObsoleted() + "\t");
+				bwResults.append(e.getPartDesignType() + "\t");
+				bwResults.append(e.getRohs() + "\t");
+				bwResults.append(e.getEuRohsExemptionListClickOnEmbeddedLink() + "\t");
+				bwResults.append(e.getRohs2015863NewAdded4PhthalatesStatusSelectOption1Yes2No() + "\t");
+				bwResults.append(e.getActiveRohsReplacementMpn() + "\t");
+				bwResults.append(e.getFormFitFunctionCompatibility() + "\t");
+				bwResults.append(e.getEuRohsExemptionListForReplacementPartReferToLink() + "\t");
+
 				bwResults.append("" + "\r\n");
 			} catch (IOException e1) {
 				e1.printStackTrace();
@@ -239,6 +254,21 @@ public class EmailDeassemblyApplication {
 		bwResults.append("RecivedDate" + "\t");
 		bwResults.append("to" + "\t");
 		bwResults.append("Status" + "\t");
+		bwResults.append("ManufacturerName" + "\t");
+		bwResults.append("CustomerInternalPartNumber" + "\t");
+		bwResults.append("Comment" + "\t");
+		bwResults.append("CorrectedManufacturerNameIfNecessary" + "\t");
+		bwResults.append("CorrectedMpnToBeFilledIfMpnIsIncorrectOrInvalid" + "\t");
+		bwResults.append("LtbDateTheLastDateByWhenTheCustomerCanOrderThePart" + "\t");
+		bwResults.append("ReasonForNrndDiscontinuedObsoletedIfPartIsNrndDiscontinuedObsoleted" + "\t");
+		bwResults.append("PartDesignType" + "\t");
+		bwResults.append("Rohs" + "\t");
+		bwResults.append("EuRohsExemptionListClickOnEmbeddedLink" + "\t");
+		bwResults.append("Rohs2015863NewAdded4PhthalatesStatusSelectOption1Yes2No" + "\t");
+		bwResults.append("ActiveRohsReplacementMpn" + "\t");
+		bwResults.append("FormFitFunctionCompatibility" + "\t");
+		bwResults.append("EuRohsExemptionListForReplacementPartReferToLink" + "\t");
+
 		bwResults.append("attached LC Status" + "\r\n");
 
 	}
