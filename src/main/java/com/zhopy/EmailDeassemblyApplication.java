@@ -122,7 +122,8 @@ public class EmailDeassemblyApplication {
 		}
 		// remove null or empty fields
 		partsStatusResults = partsStatusResults.parallelStream()
-				.filter(e -> e.getPartNumber() != null && !e.getPartNumber().isEmpty()).collect(Collectors.toList());
+				.filter(e -> e.getManufacturerPartNumberMpn() != null && !e.getManufacturerPartNumberMpn().isEmpty())
+				.collect(Collectors.toList());
 		// write compare method
 		comparePartNumbers(originalEmail, partsStatusResults, inputDtoList, messageDto);
 		flush();
@@ -141,14 +142,17 @@ public class EmailDeassemblyApplication {
 
 	public static List<InputDto> getSharedList(List<InputDto> listOne, List<InputDto> listTwo) {
 		List<InputDto> listOneList = listOne.stream()
-				.filter(two -> listTwo.stream().anyMatch(one -> one.getPartNumber().equals(two.getPartNumber())))
+				.filter(two -> listTwo.stream()
+						.anyMatch(one -> one.getManufacturerPartNumberMpn().equals(two.getManufacturerPartNumberMpn())))
 				.collect(Collectors.toList());
 		return listOneList;
 	}
 
 	public static List<InputDto> getDiffrenceList(List<InputDto> listOne, List<InputDto> listTwo) {
-		Set<String> partNumbersList = listTwo.stream().map(InputDto::getPartNumber).collect(Collectors.toSet());
-		List<InputDto> diff = listOne.stream().filter(inputDto -> !partNumbersList.contains(inputDto.getPartNumber()))
+		Set<String> partNumbersList = listTwo.stream().map(InputDto::getManufacturerPartNumberMpn)
+				.collect(Collectors.toSet());
+		List<InputDto> diff = listOne.stream()
+				.filter(inputDto -> !partNumbersList.contains(inputDto.getManufacturerPartNumberMpn()))
 				.collect(Collectors.toList());
 		return diff;
 	}
@@ -156,9 +160,9 @@ public class EmailDeassemblyApplication {
 	public static void writeAddedDeletedToResultsFile(List<InputDto> records, String status, MessageDto messageDto) {
 		records.stream().forEach(e -> {
 			try {
-				bwResults.append(e.getPartNumber() + "\t");
-				bwResults.append(e.getDescription() + "\t");
-				bwResults.append(e.getLcStatus() + "\t");
+				bwResults.append(e.getManufacturerPartNumberMpn() + "\t");
+				bwResults.append(e.getProductDescription() + "\t");
+				bwResults.append(e.getLifecycleStatus() + "\t");
 				bwResults.append(e.getOriginalEmail() + "\t");
 				bwResults.append(messageDto.getCc() + "\t");
 				bwResults.append(messageDto.getFrom() + "\t");
@@ -211,9 +215,9 @@ public class EmailDeassemblyApplication {
 
 		for (InputDto e : partsStatusResults) {
 			String[] statuLcStatus = lcStatus(e, partsStatusResults);
-			bwResults.append(e.getPartNumber() + "\t");
-			bwResults.append(e.getDescription() + "\t");
-			bwResults.append(e.getLcStatus() + "\t");
+			bwResults.append(e.getManufacturerPartNumberMpn() + "\t");
+			bwResults.append(e.getProductDescription() + "\t");
+			bwResults.append(e.getLifecycleStatus() + "\t");
 			bwResults.append(e.getOriginalEmail() + "\t");
 			bwResults.append(statuLcStatus[0] + "\t");
 			bwResults.append(statuLcStatus[1] + "\r\n");
@@ -241,9 +245,10 @@ public class EmailDeassemblyApplication {
 
 	public static String[] lcStatus(InputDto e, List<InputDto> partsStatusResults) {
 		InputDto attachedRecord = partsStatusResults.parallelStream()
-				.filter(c -> c.getPartNumber() == e.getPartNumber()).findFirst().orElse(null);
-		if (attachedRecord.getLcStatus() != e.getLcStatus()) {
-			return new String[] { "LC Changed", attachedRecord.getLcStatus() };
+				.filter(c -> c.getManufacturerPartNumberMpn() == e.getManufacturerPartNumberMpn()).findFirst()
+				.orElse(null);
+		if (attachedRecord.getLifecycleStatus() != e.getLifecycleStatus()) {
+			return new String[] { "LC Changed", attachedRecord.getLifecycleStatus() };
 		} else {
 			return new String[] { "No Change", "" };
 		}

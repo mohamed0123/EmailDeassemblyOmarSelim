@@ -11,6 +11,7 @@ public class MessageDto {
 	private String from;
 	private String to;
 	private String recivedDate;
+	private String subject;
 	private String status;
 	private String errMsg;
 }
