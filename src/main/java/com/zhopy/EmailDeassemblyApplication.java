@@ -33,7 +33,7 @@ public class EmailDeassemblyApplication {
 
 		log.info("<<<<<<<<<<<<<<<<<<<Test>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		if (args.length == 0)
-			args = new String[] { "C:\\Users\\Mohamed_Hamada\\Downloads\\Book3.xlsx" };
+			args = new String[] { "C:\\Users\\wolfn\\Downloads\\input.xlsx" };
 
 		init();
 		List<InputDto> inputDtoList = ExcelService.loadInput(args[0]);
@@ -148,6 +148,13 @@ public class EmailDeassemblyApplication {
 		return listOneList;
 	}
 
+	private static String cleanCell(String cell) {
+		if (cell != null)
+			return cell.replace("\n", " ").replace("\"", " ").replace("\r", " ").replace("\r\n", " ").replace("\t",
+					" ");
+		return " ";
+	}
+
 	public static List<InputDto> getDiffrenceList(List<InputDto> listOne, List<InputDto> listTwo) {
 		Set<String> partNumbersList = listTwo.stream().map(InputDto::getManufacturerPartNumberMpn)
 				.collect(Collectors.toSet());
@@ -159,15 +166,21 @@ public class EmailDeassemblyApplication {
 
 	public static void writeAddedDeletedToResultsFile(List<InputDto> records, String status, MessageDto messageDto) {
 		records.stream().forEach(e -> {
+
+			if (messageDto.getCc()
+					.contains("CC: \"Albuquerque, Breno\" Breno.Albuquerque@vishay.com;, \"Flowers, Justin\"")) {
+				System.out.println("next is error");
+			}
+
 			try {
 				bwResults.append(e.getManufacturerPartNumberMpn() + "\t");
 				bwResults.append(e.getProductDescription() + "\t");
 				bwResults.append(e.getLifecycleStatus() + "\t");
 				bwResults.append(e.getOriginalEmail() + "\t");
-				bwResults.append(messageDto.getCc() + "\t");
-				bwResults.append(messageDto.getFrom() + "\t");
-				bwResults.append(messageDto.getRecivedDate() + "\t");
-				bwResults.append(messageDto.getTo() + "\t");
+				bwResults.append(cleanCell(messageDto.getCc()) + "\t");
+				bwResults.append(cleanCell(messageDto.getFrom()) + "\t");
+				bwResults.append(cleanCell(messageDto.getRecivedDate()) + "\t");
+				bwResults.append(cleanCell(messageDto.getTo()) + "\t");
 				bwResults.append(status + "\t");
 				bwResults.append(e.getManufacturerName() + "\t");
 				bwResults.append(e.getCustomerInternalPartNumber() + "\t");
