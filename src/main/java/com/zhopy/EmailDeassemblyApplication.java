@@ -164,38 +164,40 @@ public class EmailDeassemblyApplication {
 		return diff;
 	}
 
-	public static void writeAddedDeletedToResultsFile(List<InputDto> records, String status, MessageDto messageDto) {
+	public static void writeAddedDeletedToResultsFile(List<InputDto> records, String status, MessageDto messageDto,
+			String originalEmail) {
 		records.stream().forEach(e -> {
 
-			if (messageDto.getCc()
-					.contains("CC: \"Albuquerque, Breno\" Breno.Albuquerque@vishay.com;, \"Flowers, Justin\"")) {
+			if (e.getManufacturerPartNumberMpn().equalsIgnoreCase("CRCW040215K4FKED")) {
 				System.out.println("next is error");
 			}
 
 			try {
-				bwResults.append(e.getManufacturerPartNumberMpn() + "\t");
-				bwResults.append(e.getProductDescription() + "\t");
-				bwResults.append(e.getLifecycleStatus() + "\t");
-				bwResults.append(e.getOriginalEmail() + "\t");
+				bwResults.append(cleanCell(e.getManufacturerPartNumberMpn()) + "\t");
+				bwResults.append(cleanCell(e.getProductDescription()) + "\t");
+				bwResults.append(cleanCell(e.getLifecycleStatus()) + "\t");
+				bwResults.append(cleanCell(originalEmail) + "\t");
+				bwResults.append(cleanCell(status) + "\t");
+				bwResults.append("\t");
 				bwResults.append(cleanCell(messageDto.getCc()) + "\t");
 				bwResults.append(cleanCell(messageDto.getFrom()) + "\t");
 				bwResults.append(cleanCell(messageDto.getRecivedDate()) + "\t");
 				bwResults.append(cleanCell(messageDto.getTo()) + "\t");
-				bwResults.append(status + "\t");
-				bwResults.append(e.getManufacturerName() + "\t");
-				bwResults.append(e.getCustomerInternalPartNumber() + "\t");
-				bwResults.append(e.getComment() + "\t");
-				bwResults.append(e.getCorrectedManufacturerNameIfNecessary() + "\t");
-				bwResults.append(e.getCorrectedMpnToBeFilledIfMpnIsIncorrectOrInvalid() + "\t");
-				bwResults.append(e.getLtbDateTheLastDateByWhenTheCustomerCanOrderThePart() + "\t");
-				bwResults.append(e.getReasonForNrndDiscontinuedObsoletedIfPartIsNrndDiscontinuedObsoleted() + "\t");
-				bwResults.append(e.getPartDesignType() + "\t");
-				bwResults.append(e.getRohs() + "\t");
-				bwResults.append(e.getEuRohsExemptionListClickOnEmbeddedLink() + "\t");
-				bwResults.append(e.getRohs2015863NewAdded4PhthalatesStatusSelectOption1Yes2No() + "\t");
-				bwResults.append(e.getActiveRohsReplacementMpn() + "\t");
-				bwResults.append(e.getFormFitFunctionCompatibility() + "\t");
-				bwResults.append(e.getEuRohsExemptionListForReplacementPartReferToLink() + "\t");
+				bwResults.append(cleanCell(e.getManufacturerName()) + "\t");
+				bwResults.append(cleanCell(e.getCustomerInternalPartNumber()) + "\t");
+				bwResults.append(cleanCell(e.getComment()) + "\t");
+				bwResults.append(cleanCell(e.getCorrectedManufacturerNameIfNecessary()) + "\t");
+				bwResults.append(cleanCell(e.getCorrectedMpnToBeFilledIfMpnIsIncorrectOrInvalid()) + "\t");
+				bwResults.append(cleanCell(e.getLtbDateTheLastDateByWhenTheCustomerCanOrderThePart()) + "\t");
+				bwResults.append(
+						cleanCell(e.getReasonForNrndDiscontinuedObsoletedIfPartIsNrndDiscontinuedObsoleted()) + "\t");
+				bwResults.append(cleanCell(e.getPartDesignType()) + "\t");
+				bwResults.append(cleanCell(e.getRohs()) + "\t");
+				bwResults.append(cleanCell(e.getEuRohsExemptionListClickOnEmbeddedLink()) + "\t");
+				bwResults.append(cleanCell(e.getRohs2015863NewAdded4PhthalatesStatusSelectOption1Yes2No()) + "\t");
+				bwResults.append(cleanCell(e.getActiveRohsReplacementMpn()) + "\t");
+				bwResults.append(cleanCell(e.getFormFitFunctionCompatibility()) + "\t");
+				bwResults.append(cleanCell(e.getEuRohsExemptionListForReplacementPartReferToLink()) + "\t");
 
 				bwResults.append("" + "\r\n");
 			} catch (IOException e1) {
@@ -211,8 +213,8 @@ public class EmailDeassemblyApplication {
 		List<InputDto> deleted = getDiffrenceList(inputDtoList, partsStatusResults);
 		List<InputDto> common = getSharedList(inputDtoList, partsStatusResults);
 
-		writeAddedDeletedToResultsFile(added, "Extra Added Parts", messageDto);
-		writeAddedDeletedToResultsFile(deleted, "Missed Parts", messageDto);
+		writeAddedDeletedToResultsFile(added, "Extra Added Parts", messageDto, originalEmail);
+		writeAddedDeletedToResultsFile(deleted, "Missed Parts", messageDto, originalEmail);
 		commonToResultsHandler(originalEmail, common, deleted, added, partsStatusResults, messageDto);
 		System.out.println("<<<<<<<<<<<>>>>>>>>>>>");
 
@@ -226,7 +228,7 @@ public class EmailDeassemblyApplication {
 		else
 			partsStatus = "No Changed Parts";
 		try {
-			boolean isLcStatusChanged = writeCommonToResultsFile(common, partsStatusResults);
+			boolean isLcStatusChanged = writeCommonToResultsFile(common, partsStatusResults, originalEmail);
 			if (isLcStatusChanged)
 				writeLogFile(originalEmail, partsStatus + "|LC Have Change", "");
 			else
@@ -237,18 +239,18 @@ public class EmailDeassemblyApplication {
 		}
 	}
 
-	public static boolean writeCommonToResultsFile(List<InputDto> common, List<InputDto> partsStatusResults)
-			throws Exception {
+	public static boolean writeCommonToResultsFile(List<InputDto> common, List<InputDto> partsStatusResults,
+			String originalEmail) throws Exception {
 		boolean isLCStatusHaveChange = false;
 
 		for (InputDto e : partsStatusResults) {
 			String[] statuLcStatus = lcStatus(e, partsStatusResults);
-			bwResults.append(e.getManufacturerPartNumberMpn() + "\t");
-			bwResults.append(e.getProductDescription() + "\t");
-			bwResults.append(e.getLifecycleStatus() + "\t");
-			bwResults.append(e.getOriginalEmail() + "\t");
-			bwResults.append(statuLcStatus[0] + "\t");
-			bwResults.append(statuLcStatus[1] + "\r\n");
+			bwResults.append(cleanCell(e.getManufacturerPartNumberMpn()) + "\t");
+			bwResults.append(cleanCell(e.getProductDescription()) + "\t");
+			bwResults.append(cleanCell(e.getLifecycleStatus()) + "\t");
+			bwResults.append(cleanCell(originalEmail) + "\t");
+			bwResults.append(cleanCell(statuLcStatus[0]) + "\t");
+			bwResults.append(cleanCell(statuLcStatus[1]) + "\r\n");
 
 			if (statuLcStatus[0].equalsIgnoreCase("No Change"))
 				isLCStatusHaveChange = true;
@@ -262,11 +264,12 @@ public class EmailDeassemblyApplication {
 		bwResults.append("Description" + "\t");
 		bwResults.append("LC Status" + "\t");
 		bwResults.append("original Mail" + "\t");
+		bwResults.append("Status" + "\t");
+		bwResults.append("attached LC Status" + "\t");
 		bwResults.append("cc" + "\t");
 		bwResults.append("from" + "\t");
 		bwResults.append("RecivedDate" + "\t");
 		bwResults.append("to" + "\t");
-		bwResults.append("Status" + "\t");
 		bwResults.append("ManufacturerName" + "\t");
 		bwResults.append("CustomerInternalPartNumber" + "\t");
 		bwResults.append("Comment" + "\t");
@@ -282,7 +285,7 @@ public class EmailDeassemblyApplication {
 		bwResults.append("FormFitFunctionCompatibility" + "\t");
 		bwResults.append("EuRohsExemptionListForReplacementPartReferToLink" + "\t");
 
-		bwResults.append("attached LC Status" + "\r\n");
+		bwResults.append("\r\n");
 
 	}
 

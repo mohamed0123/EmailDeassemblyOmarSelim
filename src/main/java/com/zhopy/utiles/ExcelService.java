@@ -26,6 +26,7 @@ public class ExcelService {
 		List<InputDto> attachedExcelDtoList = new ArrayList<>();
 		try {
 			attachedExcelDtoList = readXlsx(path, originalEmail);
+			System.out.println("data loaded ok");
 		} catch (Exception e) {
 			try {
 				if (e.getMessage().contains(
@@ -72,8 +73,8 @@ public class ExcelService {
 	public static InputDto findDataIndexes(Row row) {
 
 		InputDto excelDataIndexces = new InputDto();
-
-		for (int i = 0; i < row.getRowNum(); i++) {
+		System.out.println("cell num " + row.getPhysicalNumberOfCells());
+		for (int i = 0; i < row.getPhysicalNumberOfCells(); i++) {
 			String col = getCellStringValue(row, i);
 			if (col.equalsIgnoreCase("Manufacturer Part Number (MPN)")) {
 				excelDataIndexces.setManufacturerPartNumberMpn(i + "");
